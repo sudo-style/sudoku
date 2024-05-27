@@ -14,13 +14,26 @@ class Sudoku:
                                  [9,2,6,8,0,0,0,0,0]])
         self.board = np.copy(self.startBoard)
 
+        self.canidates = {}
+        self.mode = 'fill'
 
         self.gameLoop()
+        
+
+    def addCanidate(self):
+        self.tapRowCol()
+        self.tapValue()
 
     # tap notes
     def modeCanidate(self):
-        self.mode = "canidate"
+        
+        #if self.mode == 'canidate':
+        if (self.mode == 'fill'):
+            self.mode = 'canidate'
+        else:
+            self.mode = 'fill'
 
+        print("mode is now " + self.mode)
     # undo
     def tapUndo(self):
         pass
@@ -45,21 +58,61 @@ class Sudoku:
         self.board = np.copy(self.startBoard)
 
     def tapValue(self):
-        value = input("value")
+        value = int(input("value"))
+        self.value = value
+        
 
         row = self.row
         col = self.col
         # check if the value is zero on start board
         
-        if (self.startBoard[row][col] == 0):
-            self.board[row][col] = int(value)
-        else:
+        if (self.startBoard[row][col] != 0):
             print("can\'t change starting ")
+        elif(self.mode == 'canidate'):
+            self.toggleCanidate()
+        else:
+            # remove the canidates
+            key = (row,col)
+            value = self.value
+            dictionary = self.canidates
+            dictionary[key] = []
+
+            # fill the board
+            self.board[row][col] = value
+        
+    def toggleCanidate(self):
+        row = self.row
+        col = self.col
+
+        key = (row,col)
+        value = self.value
+        dictionary = self.canidates
+        
+        # board is cleared
+        self.board[row][col] = 0
+
+        if key not in dictionary:
+            dictionary[key] = [value]
+        elif key in dictionary and value in dictionary[key]:
+            dictionary[key].remove(value)
+        else:
+            dictionary[key].append(value)
+
+        print(dictionary)
+
+        # check if row col value is in in the canidates
+        # if it is remove it
+        # otherwise add it
+        
+    
 
     def gameLoop(self):
         while True:
             self.printBoard()
-            i = input("(e)rase, (f)ill, (h)ighlight (b)reak (c)lear: ")
+            i = input("(e)rase, (f)ill, (h)ighlight (b)reak (r)estart (c)anidate: ")
+
+            if (i == 'b'):
+                break
 
             if (i == 'e'): 
                 self.tapErase()
@@ -76,11 +129,13 @@ class Sudoku:
                 # self.get_cell_info()
                 continue
 
-            if (i == 'b'):
-                break
-
-            if (i == 'c'):
+            if (i == 'r'):
                 self.restart()
+                continue
+            
+            if (i == 'c'):
+                self.modeCanidate()
+                continue
                 
         
     
